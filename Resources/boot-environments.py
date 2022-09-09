@@ -75,13 +75,14 @@ class BootEnvironmentsManager(object):
                                                         QtWidgets.QSizePolicy.MinimumExpanding))
         self.window.closeEvent = self.quit
         self.layout = QtWidgets.QVBoxLayout()
-        
+
         # Menu
         self._showMenu()
 
         # Label
         self.label = QtWidgets.QLabel()
-        self.label.setText("Select the environment the computer should start into")
+        self.label.setText("Выберите окружение, в которую операционная система будет загружена при следующем старте, \
+или создайте новое загрузочное окружение для восстановления системы в случае сбоя.")
         self.label.setWordWrap(True)
         self.layout.addWidget(self.label)
 
@@ -102,9 +103,7 @@ class BootEnvironmentsManager(object):
 
         # Label
         self.label = QtWidgets.QLabel()
-        self.label.setText("Boot Environments are bootable clones of snapshots of the working system. \
-Create a safe failback Boot Environmnent before upgrading or making major changes to the system. \
-Note that Boot Environments by default may not cover all locations, such as /home.")
+        self.label.setText("Для работы с программой у Вас должны быть права превилигированного пользователя.")
         # TODO: Show here which paths may be not covered by the selected Boot Environment. How?
         # TODO: Offer to include EVERYTHING in Boot Environments. How?
         self.label.setWordWrap(True)
@@ -137,7 +136,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
         widget = QtWidgets.QWidget()
         widget.setLayout(self.layout)
         self.window.setCentralWidget(widget)
-        
+
         self.window.show()
 
         self.ext_process = QtCore.QProcess()
@@ -175,7 +174,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
                 if i == 0:
                     self.be_model.clear()  # This removes the column headings as well
                     self.be_model.setHorizontalHeaderLabels(
-                        ['', 'Boot Environment', 'Active', 'Mountpoint', 'Space', 'Created'])
+                        ['', 'Имя окружения', 'Статус', 'Точка монтированя', 'Размер', 'Дата создания'])
 
                 i = i + 1
                 # This is a really crude attempt to read line-wise. TODO: Do more elegant, like in 'Mount Disk Image.app'
@@ -186,12 +185,12 @@ Note that Boot Environments by default may not cover all locations, such as /hom
                 active = parts[1]
                 is_active_on_reboot = False
                 if active == "NR":
-                    active = "Now and on reboot"
+                    active = "NR"
                     is_active_on_reboot = True
                 if active == "N":
-                    active = "Now"
+                    active = "N"
                 if active == "R":
-                    active = "On reboot"
+                    active = "R"
                     is_active_on_reboot = True
                 mountpoint = parts[2]
                 space = parts[3]
@@ -231,7 +230,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
         reply = QtWidgets.QMessageBox.question(
             self.window,
             "Restart",
-            "Are you sure you want to restart your computer now?\nAll unsaved work will be lost.",
+            "Вы уверены, что хотите сейчас перезагрузить компьютер?\nВсе несохраненные данные будут потеряны.",
             QtWidgets.QMessageBox.Cancel,
             QtWidgets.QMessageBox.Ok
         )
@@ -311,7 +310,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
             # something more complicated, like a QEventLoop?
             # https://forum.qt.io/topic/75454/qprocess-readall-and-qprocess-readallstandardoutput-both-return-an-empty-string-after-qprocess-write-is-run
             if error_string == "":
-                error_string = "Could not activate Boot Environment"
+                error_string = "Это оркружение не может быть активировано"
             QtWidgets.QMessageBox.critical(
                 self.window,
                 "Error",
@@ -327,8 +326,8 @@ Note that Boot Environments by default may not cover all locations, such as /hom
         self.update_mount_button(row)
 
     def new(self, sender):
-        text, ok = QtWidgets.QInputDialog.getText(self.window, "New",
-                                                  "Boot Environment Name:", QtWidgets.QLineEdit.Normal,
+        text, ok = QtWidgets.QInputDialog.getText(self.window, "Новое",
+                                                  "Имя окружения:", QtWidgets.QLineEdit.Normal,
                                                   "")
         if ok and text:
 
@@ -367,7 +366,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
                 # something more complicated, like a QEventLoop?
                 # https://forum.qt.io/topic/75454/qprocess-readall-and-qprocess-readallstandardoutput-both-return-an-empty-string-after-qprocess-write-is-run
                 if error_string == "":
-                    error_string = "Could not create Boot Environment"
+                    error_string = "Это окружение не может быть активировано"
                 QtWidgets.QMessageBox.critical(
                     self.window,
                     "Error",
@@ -391,8 +390,8 @@ Note that Boot Environments by default may not cover all locations, such as /hom
 
         reply = QtWidgets.QMessageBox.question(
             self.window,
-            "Remove",
-            "Do you really want to remove %s?\nThis cannot be undone." % boot_environment,
+            "Удаление",
+            "Вы действительно хотите удалить %s?\nЕсли подтвердите, то это не может быть отменено." % boot_environment,
             QtWidgets.QMessageBox.Cancel,
             QtWidgets.QMessageBox.Ok
         )
@@ -429,7 +428,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
                 # something more complicated, like a QEventLoop?
                 # https://forum.qt.io/topic/75454/qprocess-readall-and-qprocess-readallstandardoutput-both-return-an-empty-string-after-qprocess-write-is-run
                 if error_string == "":
-                    error_string = "Could not destroy Boot Environment"
+                    error_string = "Это окружение не может быть удалено"
                 QtWidgets.QMessageBox.critical(
                     self.window,
                     "Error",
@@ -493,7 +492,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
             # something more complicated, like a QEventLoop?
             # https://forum.qt.io/topic/75454/qprocess-readall-and-qprocess-readallstandardoutput-both-return-an-empty-string-after-qprocess-write-is-run
             if error_string == "":
-                error_string = "Could not %s Boot Environment" % command
+                error_string = "Не возможно  %s Boot Environment" % command
             QtWidgets.QMessageBox.critical(
                 self.window,
                 "Error",
@@ -508,7 +507,7 @@ Note that Boot Environments by default may not cover all locations, such as /hom
             p5 = QtCore.QProcess()
             p5.setProgram("launch")
             mountpoint = self.be_model.itemData(self.be_model.index(self.selection_index, 3))[0]
-            p5.setArguments(["Filer", mountpoint])
+            p5.setArguments(["caja", mountpoint])
             try:
                 pid = p5.startDetached()
             except:
@@ -522,17 +521,22 @@ Note that Boot Environments by default may not cover all locations, such as /hom
         self.update_mount_button(self.selection_index)
 
     def _showMenu(self):
-        exitAct = QtWidgets.QAction('&Quit', self.window)
+        exitAct = QtWidgets.QAction('&Выйти', self.window)
         exitAct.setShortcut('Ctrl+Q')
         exitAct.setStatusTip('Exit application')
         exitAct.triggered.connect(QtWidgets.QApplication.quit)
         menubar = self.window.menuBar()
-        fileMenu = menubar.addMenu('&File')
+        fileMenu = menubar.addMenu('&Файл')
         fileMenu.addAction(exitAct)
-        aboutAct = QtWidgets.QAction('&About', self.window)
+
+        aboutAct = QtWidgets.QAction('&О программе', self.window)
         aboutAct.setStatusTip('About this application')
         aboutAct.triggered.connect(self._showAbout)
-        helpMenu = menubar.addMenu('&Help')
+        helpAct = QtWidgets.QAction('&Использование', self.window)
+        helpAct.setStatusTip('How use this application')
+        helpAct.triggered.connect(self._showHelp)
+        helpMenu = menubar.addMenu('&Помощь')
+        helpMenu.addAction(helpAct)
         helpMenu.addAction(aboutAct)
 
     def _showAbout(self):
@@ -548,9 +552,55 @@ Note that Boot Environments by default may not cover all locations, such as /hom
                 msg.setDetailedText(data)
         msg.setText("<h3>Boot Environments</h3>")
         msg.setInformativeText(
-            "A simple preferences application to modify <a href='https://bsd-pl.org/assets/talks/2018-07-30_1_S%C5%82awomir-Wojciech-Wojtczak_ZFS-Boot-Environments.pdf'>ZFS Boot Environments</a><br><br><a href='https://github.com/helloSystem/Utilities'>https://github.com/helloSystem/Utilities</a>")
+            "<hr>A simple preferences application to modify <a href='https://bsd-pl.org/assets/talks/2018-07-30_1_S%C5%82awomir-Wojciech-Wojtczak_ZFS-Boot-Environments.pdf'>ZFS Boot Environments</a><br><br><a href='https://github.com/helloSystem/Utilities'>https://github.com/helloSystem/Utilities</a>")
         msg.exec()
 
+    def _showHelp(self):
+        print("showDialog")
+        msg = QtWidgets.QMessageBox()
+        msg.setWindowTitle("Помощь")
+        msg.setText("<h3>Описание и использование программы</h3>")
+        msg.setInformativeText(
+            "<hr><h4>Общие сведения</h4 \
+            <p>Загрузочное окружение — это клон моментального снимка загрузочной среды текущего состояния системы. \
+            Перед обновлением или внесением серьезных изменений в систему настоятельно рекомендуется создавать безопасную загрузочную среду для восстановления после возникновения сбоя. \
+            Обратите внимание, что загрузочные оркружения по умолчанию могут не охватывать все расположения данных, например в каталоге /home. Более подробно об этом можно ознакомиться по \
+            этой ссылке: <a href='https://klarasystems.com/articles/basics-of-zfs-snapshot-management/'><b>Basics of ZFS Snapshot Management</b></a> \
+            <p>Это приложение является графической надстройкой над утилитой <b>bectl</b> и обеспечивет выполнение лишь ее базовых операций с моментальными снимками, \
+            такими как: создание, удаление, монтирование, размонтирование снимков и перезгрузка системы в выбранное загрузочное оркужение. \
+            Если Вам необходимо больше возможностей для работы, то обратитесь к официальному руководству FreeBSD по утилите <a href='https://www.freebsd.org/cgi/man.cgi?bectl(8)'><b>BECTL(8)</b></a> \
+            и ознакомтесь с информацией по этой ссылке: <a href='https://klarasystems.com/articles/managing-boot-environments/'><b>Managing boot environments</b></a> \
+            <hr><h4>Использование элементов интерфейса</h4>\
+            <ul><li>Для выбора активного окружения при следующей загрузке системы, отметьте ее в чекбоске. При этом поле <b>Статус</b> оружения станет <b>R</b>. \
+            Ниже представлены всевозможные значения поля <b>Статсус</b>: \
+            <table> \
+            <thead> \
+            <tr> \
+                <th>Значение</th> \
+                <th>Описание</th> \
+            </tr> \
+            </thead> \
+            <tbody> \
+            <tr> \
+                <td>N</td> \
+                <td><pre>	Активно сейчас</pre></td> \
+            </tr> \
+            <tr> \
+                <td>R</td> \
+                <td><pre>	Активно при следующей загрузке</pre></td> \
+            </tr> \
+            <tr> \
+                <td>NR</td> \
+                <td><pre>	Активно сейчас и при следующей загрузке</pre></td> \
+            </tr> \
+            </tbody> \
+            </table> </li>\
+            <p><li>Для монтрования окружения выделите курсором строку в списке и нажмите кнопку <b>[Mount]</b>.  При этом в поле <b>Точка монтирования</b> будет отображаться ее путь.</li> \
+            <p><li>Для размонтрования окружения выделите курсором строку в списке и нажмите кнопку <b>[Umount]</b>.  При этом в поле <b>Точка монтирования</b> путь отображаться не будет.</li> \
+            <p><li>Для удаления окружения выделите курсором строку в списке и нажмите кнопку <b>[Remove]</b>. После подтверждения удаления это окружение исчезнет из списка.</li> \
+            <p><li>Для создания нового окружения нажмите кнопку <b>[New....]</b></li> \
+            <p><li>Для перезагрузки системы в выбранное активное окружение нажмите кнопку <b>[Restart...]</b></li></ul>")
+        msg.exec()
 
 if __name__ == "__main__":
     BootEnvironmentsManager()
